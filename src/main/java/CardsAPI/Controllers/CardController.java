@@ -3,47 +3,47 @@ package CardsAPI.Controllers;
 import CardsAPI.Dtos.request.CardCreateRequest;
 import CardsAPI.Dtos.request.CardUpdateRequest;
 import CardsAPI.Dtos.response.CardResponse;
+import CardsAPI.Dtos.response.PagedResponse;
 import CardsAPI.Services.Interface.ICardService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/cards")
 @RequiredArgsConstructor
 public class CardController {
 
-    private final ICardService cardService;
-
+    private final ICardService service;
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public CardResponse create(@RequestBody CardCreateRequest request) {
-        return cardService.create(request);
+    public ResponseEntity<CardResponse> create(@Valid @RequestBody CardCreateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request));
     }
 
-    @PutMapping("/{cardId}")
-    public CardResponse update(@PathVariable Long cardId, @RequestBody CardUpdateRequest request) {
-
-        return cardService.update(cardId, request);
+    @PutMapping("/{id}")
+    public CardResponse update(@PathVariable UUID id, @Valid @RequestBody CardUpdateRequest request) {
+        return service.update(id, request);
     }
 
-    @GetMapping("/{cardId}")
-    public CardResponse getById(@PathVariable Long cardId) {
-
-        return cardService.getById(cardId);
+    @GetMapping("/{id}")
+    public CardResponse getById(@PathVariable UUID id) {
+        return service.getById(id);
     }
 
     @GetMapping
-    public Page<CardResponse> getAll(@RequestParam(defaultValue = "0") int page) {
-
-        return cardService.getAll(page);
+    public PagedResponse<CardResponse> getAll(@RequestParam(defaultValue = "0") @Min(0) int page) {
+        return service.getAll(page);
     }
 
-    @DeleteMapping("/{cardId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long cardId) {
-
-        cardService.delete(cardId);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
